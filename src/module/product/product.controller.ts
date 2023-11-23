@@ -1,5 +1,17 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UploadedFiles,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductService } from './product.service';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ResponseData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { Product } from 'src/entities/product.entity';
@@ -7,7 +19,10 @@ import { ProductType } from 'src/utils/product.type';
 
 @Controller('/product')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(
+    private readonly productService: ProductService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Get('all')
   async getAllProduct(): Promise<ResponseData<Product[]>> {
@@ -130,13 +145,20 @@ export class ProductController {
       return new ResponseData<null>(null, HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
-  // Cần chỉnh sửa upload file
+
   @Post('create')
+  @UseInterceptors(FileInterceptor('urlProduct'))
   async createProduct(
-    @Body() product: ProductType,
-  ): Promise<ResponseData<Product>> {
+    @UploadedFile() file: Express.Multer.File,
+    @Body() product: Product,
+  ): Promise<ResponseData<Product | string>> {
     try {
-      const newProduct = await this.productService.create(product);
+      const ProductUrl = await this.cloudinaryService.uploadFile(file);
+      const productDataToCreate = {
+        urlProduct: ProductUrl.url,
+        ...product,
+      };
+      const newProduct = await this.productService.create(productDataToCreate);
       return new ResponseData<Product>(
         newProduct,
         HttpStatus.SUCCESS,
@@ -147,34 +169,74 @@ export class ProductController {
       return new ResponseData<null>(null, HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
-  // Cần chỉnh sửa upload file
+
   @Post('update')
+  @UseInterceptors(FileInterceptor('urlProduct'))
   async updateDetailProduct(
+    @UploadedFile() file: Express.Multer.File,
     @Body() newProduct: Product,
   ): Promise<ResponseData<Product | string>> {
-    const { id, ...newPorductToUpdate } = newProduct;
     try {
-      const product = await this.productService.findOne(id);
-      if (product) {
-        const updatePorduct = await this.productService.update(
-          id,
-          newPorductToUpdate,
-        );
-        return new ResponseData<Product>(
-          updatePorduct,
-          HttpStatus.SUCCESS,
-          HttpMessage.SUCCESS,
-        );
+      if (file) {
+        const { id, ...newPorductToUpdate } = newProduct;
+        const ProductUrl = await this.cloudinaryService.uploadFile(file);
+        const product = await this.productService.findOne(id);
+        const dataToUpdate: ProductType = {
+          detail: newPorductToUpdate.detail,
+          item: newPorductToUpdate.item,
+          name: newPorductToUpdate.name,
+          urlProduct: ProductUrl.url,
+          origin: newPorductToUpdate.origin,
+          price: newPorductToUpdate.price,
+          size: newPorductToUpdate.size,
+          status: newPorductToUpdate.status,
+          material: newPorductToUpdate.material,
+        };
+        if (product) {
+          const updatePorduct = await this.productService.update(
+            id,
+            dataToUpdate,
+          );
+          return new ResponseData<Product>(
+            updatePorduct,
+            HttpStatus.SUCCESS,
+            HttpMessage.SUCCESS,
+          );
+        } else {
+          return new ResponseData<string>(
+            'Product not found',
+            HttpStatus.SUCCESS,
+            HttpMessage.SUCCESS,
+          );
+        }
       } else {
-        return new ResponseData<string>(
-          'Product not found',
-          HttpStatus.SUCCESS,
-          HttpMessage.SUCCESS,
-        );
+        const { id, ...newPorductToUpdate } = newProduct;
+        const product = await this.productService.findOne(id);
+        if (product) {
+          const updatePorduct = await this.productService.update(
+            id,
+            newPorductToUpdate,
+          );
+          return new ResponseData<Product>(
+            updatePorduct,
+            HttpStatus.SUCCESS,
+            HttpMessage.SUCCESS,
+          );
+        } else {
+          return new ResponseData<string>(
+            'Product not found',
+            HttpStatus.SUCCESS,
+            HttpMessage.SUCCESS,
+          );
+        }
       }
     } catch (err) {
       console.log(err);
-      return new ResponseData<null>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+      return new ResponseData<string>(
+        err,
+        HttpStatus.SUCCESS,
+        HttpMessage.SUCCESS,
+      );
     }
   }
 

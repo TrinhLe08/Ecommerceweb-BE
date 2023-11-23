@@ -21,7 +21,7 @@ export class ShoppingListModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(CheckTokenMiddleware)
-      .forRoutes('shoppingList/create', 'shoppingList/remove/:id');
+      .forRoutes('shoppingList/all', 'shoppingList/remove/:id');
   }
   private dataSource: DataSource;
 }

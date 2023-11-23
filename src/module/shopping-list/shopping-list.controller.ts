@@ -12,9 +12,9 @@ export class ShoppingListController {
   @Get('all')
   async getAllOrder(): Promise<ResponseData<ShoppingList[]>> {
     try {
-      const allUser = await this.shoppingListService.getAll();
+      const allOrder = await this.shoppingListService.getAll();
       return new ResponseData<ShoppingList[]>(
-        allUser,
+        allOrder,
         HttpStatus.SUCCESS,
         HttpMessage.SUCCESS,
       );
@@ -41,11 +41,14 @@ export class ShoppingListController {
   }
 
   @Delete('remove/:id')
-  async getDeleteOrder(@Param('id') id: number): Promise<ResponseData<string>> {
+  async getDeleteOrder(
+    @Param('id') id: number,
+  ): Promise<ResponseData<ShoppingList>> {
     try {
       await this.shoppingListService.remove(id);
-      return new ResponseData<string>(
-        'Remove success',
+      const allOrder = await this.shoppingListService.getAll();
+      return new ResponseData<ShoppingList>(
+        allOrder,
         HttpStatus.SUCCESS,
         HttpMessage.SUCCESS,
       );

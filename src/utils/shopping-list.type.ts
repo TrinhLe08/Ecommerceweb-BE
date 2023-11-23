@@ -3,6 +3,7 @@ export type OrderDetailType = {
   quantity: number;
   nameOrder: string;
   urlOrder: string;
+  priceOrder: number;
 };
 
 export type ShoppingListType = {
@@ -10,10 +11,9 @@ export type ShoppingListType = {
   price: number;
   quantity: number;
   phoneNumber: string;
-  address: string;
-  nation: string;
+  city: string;
+  country: string;
   purchasDate: string;
-  paymentMethods: string;
   email: string;
   status: boolean;
   detailOrder: OrderDetailType[];

@@ -19,19 +19,16 @@ export class ShoppingList extends BaseEntity {
   phoneNumber: string;
 
   @Column()
-  nation: string;
+  country: string;
 
   @Column()
-  address: string;
+  city: string;
 
   @Column()
   email: string;
 
   @Column()
   purchasDate: string;
-
-  @Column()
-  paymentMethods: string;
 
   @Column()
   status: boolean;

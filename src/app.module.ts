@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
 import * as dotenv from 'dotenv';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DataSource } from 'typeorm';
@@ -9,10 +9,12 @@ import { UserModule } from './module/user/user.module';
 import { ProductModule } from './module/product/product.module';
 import { ShoppingListModule } from './module/shopping-list/shopping-list.module';
 import { AdminModule } from './module/admin/admin.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { User } from './entities/user.entity';
 import { Product } from './entities/product.entity';
 import { ShoppingList } from './entities/shoppingList.entity';
 import { Admin } from './entities/admin.entity';
+import { CloudinaryService } from './cloudinary/cloudinary.service';
 dotenv.config();
 
 @Module({
@@ -31,9 +33,10 @@ dotenv.config();
     ProductModule,
     ShoppingListModule,
     AdminModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, CloudinaryService],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}
