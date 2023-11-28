@@ -1,9 +1,20 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+} from '@nestjs/common';
 import { ShoppingListService } from './shopping-list.service';
 import { ResponseData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { ShoppingList } from 'src/entities/shoppingList.entity';
-import { ShoppingListType } from 'src/utils/shopping-list.type';
+import {
+  OrderDetailType,
+  ShoppingListType,
+} from 'src/utils/shopping-list.type';
 
 @Controller('/shopping-list')
 export class ShoppingListController {
@@ -52,6 +63,33 @@ export class ShoppingListController {
         HttpStatus.SUCCESS,
         HttpMessage.SUCCESS,
       );
+    } catch (err) {
+      console.log(err);
+      return new ResponseData<null>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+    }
+  }
+
+  @Put('update/:id')
+  async updateOrder(
+    @Body() newOrder: ShoppingListType,
+    @Param('id') idOrder: number,
+  ): Promise<ResponseData<ShoppingList>> {
+    try {
+      if (idOrder && newOrder) {
+        await this.shoppingListService.update(idOrder, newOrder);
+        const allOrder = await this.shoppingListService.getAll();
+        return new ResponseData<ShoppingList>(
+          allOrder,
+          HttpStatus.SUCCESS,
+          HttpMessage.SUCCESS,
+        );
+      } else {
+        return new ResponseData<null>(
+          null,
+          HttpStatus.ERROR,
+          HttpMessage.ERROR,
+        );
+      }
     } catch (err) {
       console.log(err);
       return new ResponseData<null>(null, HttpStatus.ERROR, HttpMessage.ERROR);
