@@ -8,6 +8,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { ShoppingListService } from './shopping-list.service';
+import { UserService } from '../user/user.service';
 import { ResponseData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { ShoppingList } from 'src/entities/shoppingList.entity';
@@ -15,10 +16,15 @@ import {
   OrderDetailType,
   ShoppingListType,
 } from 'src/utils/shopping-list.type';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Controller('/shopping-list')
 export class ShoppingListController {
-  constructor(private readonly shoppingListService: ShoppingListService) {}
+  constructor(
+    private readonly shoppingListService: ShoppingListService,
+    private readonly userService: UserService,
+    private readonly mailerSevice: MailerService,
+  ) {}
 
   @Get('all')
   async getAllOrder(): Promise<ResponseData<ShoppingList[]>> {
@@ -37,14 +43,45 @@ export class ShoppingListController {
   @Post('create')
   async createOrder(
     @Body() order: ShoppingListType,
-  ): Promise<ResponseData<ShoppingList>> {
+  ): Promise<ResponseData<ShoppingList | any>> {
+    console.log(order, 43);
     try {
-      const newOrder = await this.shoppingListService.create(order);
-      return new ResponseData<ShoppingList>(
-        newOrder,
-        HttpStatus.SUCCESS,
-        HttpMessage.SUCCESS,
-      );
+      const userInformation = await this.userService.findByEmail(order.email);
+      if (userInformation) {
+        userInformation.point = userInformation.point - order.point + 5;
+        userInformation.spent = userInformation.spent + order.price;
+        order.detailOrder.forEach((o) => {
+          userInformation.bought.push(o.idOrder);
+        });
+        userInformation.bought = Array.from(new Set(userInformation.bought));
+        await this.userService.update(userInformation.id, userInformation);
+        const dataUser = {
+          id: userInformation.id,
+          email: userInformation.email,
+          bought: userInformation.bought,
+          urlAvatar: userInformation.urlAvatar,
+        };
+        const newOrder = await this.shoppingListService.create(order);
+        if (newOrder) {
+          return new ResponseData<ShoppingList | boolean | any>(
+            dataUser,
+            HttpStatus.SUCCESS,
+            HttpMessage.SUCCESS,
+          );
+        } else {
+          return new ResponseData<ShoppingList | boolean>(
+            false,
+            HttpStatus.SUCCESS,
+            HttpMessage.SUCCESS,
+          );
+        }
+      } else {
+        return new ResponseData<string>(
+          'User not exist',
+          HttpStatus.ERROR,
+          HttpMessage.ERROR,
+        );
+      }
     } catch (err) {
       console.log(err);
       return new ResponseData<null>(null, HttpStatus.ERROR, HttpMessage.ERROR);

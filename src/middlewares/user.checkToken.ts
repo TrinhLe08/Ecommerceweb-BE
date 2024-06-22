@@ -6,15 +6,13 @@ import { HttpStatus } from 'src/global/globalEnum';
 import { JwtService } from 'src/global/gobalJwt';
 
 @Injectable()
-export class CheckTokenAdminMiddleware implements NestMiddleware {
+export class CheckTokenUserMiddleware implements NestMiddleware {
   constructor(private readonly jwtService: JwtService) {}
   use(req: Request, res: Response, next: NextFunction) {
     const token = req.headers.authorization;
-    console.log(token);
-
-    if (token) {
+    const tokenVetify = this.jwtService.verify(token);
+    if (tokenVetify) {
       try {
-        this.jwtService.verify(token);
         next();
       } catch (error) {
         return new ResponseData<string>(
@@ -25,7 +23,7 @@ export class CheckTokenAdminMiddleware implements NestMiddleware {
       }
     } else if (token === undefined) {
       return new ResponseData<string>(
-        'Wrong Token !',
+        'Wrong or missing Token !',
         HttpStatus.ERROR,
         HttpMessage.ERROR,
       );

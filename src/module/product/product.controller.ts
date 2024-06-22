@@ -5,7 +5,6 @@ import {
   Body,
   Param,
   Delete,
-  UploadedFiles,
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
@@ -15,7 +14,7 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ResponseData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { Product } from 'src/entities/product.entity';
-import { ProductType } from 'src/utils/product.type';
+import { ProductType, UserComment } from 'src/utils/product.type';
 
 @Controller('/product')
 export class ProductController {
@@ -185,12 +184,14 @@ export class ProductController {
           detail: newPorductToUpdate.detail,
           item: newPorductToUpdate.item,
           name: newPorductToUpdate.name,
+          ratting: product.ratting,
           urlProduct: ProductUrl.url,
           origin: newPorductToUpdate.origin,
           price: newPorductToUpdate.price,
           size: newPorductToUpdate.size,
           status: newPorductToUpdate.status,
           material: newPorductToUpdate.material,
+          comment: newPorductToUpdate.comment,
         };
         if (product) {
           const updatePorduct = await this.productService.update(
@@ -230,6 +231,40 @@ export class ProductController {
           );
         }
       }
+    } catch (err) {
+      console.log(err);
+      return new ResponseData<string>(
+        err,
+        HttpStatus.SUCCESS,
+        HttpMessage.SUCCESS,
+      );
+    }
+  }
+
+  @Post('comment') async CommentProduct(
+    @Body() content: { idProduct: number; data: UserComment },
+  ): Promise<ResponseData<Product | any>> {
+    try {
+      const productDetail = await this.productService.findOne(
+        content.idProduct,
+      );
+      productDetail.comment.push(content.data);
+      const sumRatting = productDetail.comment.reduce(
+        (acc, obj: UserComment) => acc + obj.ratting,
+        0,
+      );
+      productDetail.ratting = sumRatting / productDetail.comment.length;
+      console.log(productDetail.ratting);
+
+      const updateComment = await this.productService.update(
+        productDetail.id,
+        productDetail,
+      );
+      return new ResponseData<Product>(
+        updateComment,
+        HttpStatus.SUCCESS,
+        HttpMessage.SUCCESS,
+      );
     } catch (err) {
       console.log(err);
       return new ResponseData<string>(

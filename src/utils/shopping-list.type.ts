@@ -13,7 +13,9 @@ export type ShoppingListType = {
   phoneNumber: string;
   city: string;
   country: string;
+  address: string;
   purchasDate: string;
+  point: number;
   email: string;
   status: boolean;
   detailOrder: OrderDetailType[];

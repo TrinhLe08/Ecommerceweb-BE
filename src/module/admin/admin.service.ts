@@ -23,8 +23,8 @@ export class AdminService {
     return this.adminRepository.findOne({ where: { id: id } });
   }
 
-  async login(name: string): Promise<Admin> {
-    return this.adminRepository.findOne({ where: { name: name } });
+  async login(email: string): Promise<Admin> {
+    return this.adminRepository.findOne({ where: { email: email } });
   }
 
   async update(id: number, newAdmin: AdminType): Promise<Admin> {

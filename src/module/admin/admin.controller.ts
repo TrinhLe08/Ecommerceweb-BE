@@ -34,27 +34,35 @@ export class AdminController {
     @Body() dataLoginAdmin: AdminType,
   ): Promise<ResponseData<string>> {
     try {
-      const informationAdmin = await this.adminService.login(
-        dataLoginAdmin.name,
-      );
-      const encodePassword: any = this.jwtService.verify(
-        informationAdmin.password,
-      );
-      if (
-        informationAdmin &&
-        encodePassword.password === dataLoginAdmin.password
-      ) {
-        const token: string = jwt.sign(
-          {
-            name: informationAdmin.name,
-            password: informationAdmin.password,
-          },
-          'key',
+      if (dataLoginAdmin.email && dataLoginAdmin.password) {
+        const informationAdmin = await this.adminService.login(
+          dataLoginAdmin.email,
         );
+        const encodePassword: any = this.jwtService.verify(
+          informationAdmin.password,
+        );
+        if (
+          informationAdmin &&
+          encodePassword.password === dataLoginAdmin.password
+        ) {
+          const token: string = jwt.sign(
+            {
+              name: informationAdmin.email,
+              password: informationAdmin.password,
+            },
+            'key',
+          );
+          return new ResponseData<string>(
+            token,
+            HttpStatus.SUCCESS,
+            HttpMessage.SUCCESS,
+          );
+        }
+      } else {
         return new ResponseData<string>(
-          token,
-          HttpStatus.SUCCESS,
-          HttpMessage.SUCCESS,
+          'Lack of information',
+          HttpStatus.ERROR,
+          HttpMessage.ERROR,
         );
       }
     } catch (err) {
@@ -68,20 +76,30 @@ export class AdminController {
   }
 
   @Post('create')
-  async createAdmin(@Body() admin: AdminType): Promise<ResponseData<Admin>> {
+  async createAdmin(
+    @Body() admin: AdminType,
+  ): Promise<ResponseData<Admin | string>> {
     try {
-      const encodePassword: string = this.jwtService.sign({
-        password: admin.password,
-      });
-      const newAdmin = await this.adminService.create({
-        name: admin.name,
-        password: encodePassword,
-      });
-      return new ResponseData<Admin>(
-        newAdmin,
-        HttpStatus.SUCCESS,
-        HttpMessage.SUCCESS,
-      );
+      if (admin.email && admin.password) {
+        const encodePassword: string = this.jwtService.sign({
+          password: admin.password,
+        });
+        const newAdmin = await this.adminService.create({
+          email: admin.email,
+          password: encodePassword,
+        });
+        return new ResponseData<Admin>(
+          newAdmin,
+          HttpStatus.SUCCESS,
+          HttpMessage.SUCCESS,
+        );
+      } else {
+        return new ResponseData<string>(
+          'Lack of information',
+          HttpStatus.ERROR,
+          HttpMessage.ERROR,
+        );
+      }
     } catch (err) {
       console.log(err, 'createAdmin');
       return new ResponseData<null>(null, HttpStatus.ERROR, HttpMessage.ERROR);

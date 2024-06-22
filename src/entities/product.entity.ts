@@ -1,3 +1,4 @@
+import { UserComment } from 'src/utils/product.type';
 import { Entity, Column, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 
 @Entity({ name: 'allproduct' })
@@ -10,6 +11,9 @@ export class Product extends BaseEntity {
 
   @Column()
   name: string;
+
+  @Column()
+  ratting: number;
 
   @Column()
   price: number;
@@ -31,4 +35,7 @@ export class Product extends BaseEntity {
 
   @Column()
   item: string;
+
+  @Column('json')
+  comment: UserComment[];
 }

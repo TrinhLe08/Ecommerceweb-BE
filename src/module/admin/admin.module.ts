@@ -10,7 +10,7 @@ import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { Admin } from 'src/entities/admin.entity';
 import { JwtService } from 'src/global/gobalJwt';
-import { CheckTokenMiddleware } from 'src/middlewares/admin.checkToken';
+import { CheckTokenAdminMiddleware } from 'src/middlewares/admin.checkToken';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Admin])],
@@ -19,7 +19,7 @@ import { CheckTokenMiddleware } from 'src/middlewares/admin.checkToken';
 })
 export class AdminModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CheckTokenMiddleware).forRoutes('admin/all', 'admin/create');
+    consumer.apply(CheckTokenAdminMiddleware).forRoutes('admin/all');
   }
   private dataSource: DataSource;
 }

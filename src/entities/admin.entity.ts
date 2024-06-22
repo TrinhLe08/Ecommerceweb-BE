@@ -6,7 +6,7 @@ export class Admin extends BaseEntity {
   id: number;
 
   @Column()
-  name: string;
+  email: string;
 
   @Column()
   password: string;

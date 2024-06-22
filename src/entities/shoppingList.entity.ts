@@ -25,6 +25,12 @@ export class ShoppingList extends BaseEntity {
   city: string;
 
   @Column()
+  address: string;
+
+  @Column()
+  point: number;
+
+  @Column()
   email: string;
 
   @Column()

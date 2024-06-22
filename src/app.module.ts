@@ -1,7 +1,6 @@
-import { Module } from '@nestjs/common';
+import { Inject, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as dotenv from 'dotenv';
-import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DataSource } from 'typeorm';
@@ -15,6 +14,11 @@ import { Product } from './entities/product.entity';
 import { ShoppingList } from './entities/shoppingList.entity';
 import { Admin } from './entities/admin.entity';
 import { CloudinaryService } from './cloudinary/cloudinary.service';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { join } from 'path';
+import Handlebars from 'handlebars/runtime';
 dotenv.config();
 
 @Module({
@@ -28,6 +32,30 @@ dotenv.config();
       database: process.env.DB_NAME,
       entities: [User, Product, ShoppingList, Admin],
       synchronize: true,
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (config: ConfigService) => ({
+        transport: {
+          host: config.get('MAIL_HOST'),
+          secure: false,
+          auth: {
+            user: config.get('MAIL_USER'),
+            pass: config.get('MAIL_PASSWORD'),
+          },
+        },
+        defaults: {
+          from: `"No Reply" <${config.get('MAIL_FORM')}>`,
+        },
+        template: {
+          dir: join(__dirname, 'src/templates/email'),
+          adapter: new PugAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+      inject: [ConfigService],
     }),
     UserModule,
     ProductModule,
