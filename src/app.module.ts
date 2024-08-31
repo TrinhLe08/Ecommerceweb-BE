@@ -1,4 +1,4 @@
-import { Inject, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as dotenv from 'dotenv';
 import { AppController } from './app.controller';
@@ -10,15 +10,15 @@ import { ShoppingListModule } from './module/shopping-list/shopping-list.module'
 import { AdminModule } from './module/admin/admin.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { User } from './entities/user.entity';
+import { ConfirmCode } from './entities/confirmCode';
 import { Product } from './entities/product.entity';
 import { ShoppingList } from './entities/shoppingList.entity';
 import { Admin } from './entities/admin.entity';
 import { CloudinaryService } from './cloudinary/cloudinary.service';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
-import Handlebars from 'handlebars/runtime';
+import { HandlebarsAdapter } from '@nest-modules/mailer';
 dotenv.config();
 
 @Module({
@@ -30,7 +30,7 @@ dotenv.config();
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [User, Product, ShoppingList, Admin],
+      entities: [User, ConfirmCode, Product, ShoppingList, Admin],
       synchronize: true,
     }),
     MailerModule.forRootAsync({
@@ -49,7 +49,7 @@ dotenv.config();
         },
         template: {
           dir: join(__dirname, 'src/templates/email'),
-          adapter: new PugAdapter(),
+          adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
           },

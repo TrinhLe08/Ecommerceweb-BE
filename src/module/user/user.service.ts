@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { UserType } from 'src/utils/user.type';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class UserService {
@@ -27,10 +28,23 @@ export class UserService {
     return this.userRepository.findOne({ where: { email: email } });
   }
 
+  createRandomCode(length: number): string {
+    const code = crypto
+      .randomBytes(Math.ceil(length / 2))
+      .toString('hex')
+      .slice(0, length);
+    return code;
+  }
+
   async update(id: number, newUser: UserType): Promise<User> {
     await this.userRepository.update(id, newUser);
     return this.userRepository.findOne({ where: { id: id } });
   }
+
+  async updatePassword(id: number, newPassword: string): Promise<User> {
+    await this.userRepository.update(id, { password: newPassword });
+    return this.userRepository.findOne({ where: { id: id } });
+}
 
   async remove(id: number): Promise<void> {
     await this.userRepository.delete(id);

@@ -254,7 +254,6 @@ export class ProductController {
         0,
       );
       productDetail.ratting = sumRatting / productDetail.comment.length;
-      console.log(productDetail.ratting);
 
       const updateComment = await this.productService.update(
         productDetail.id,

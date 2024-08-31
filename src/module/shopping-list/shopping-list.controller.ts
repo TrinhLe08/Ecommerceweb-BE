@@ -12,18 +12,16 @@ import { UserService } from '../user/user.service';
 import { ResponseData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { ShoppingList } from 'src/entities/shoppingList.entity';
-import {
-  OrderDetailType,
-  ShoppingListType,
-} from 'src/utils/shopping-list.type';
+import { ShoppingListType } from 'src/utils/shopping-list.type';
 import { MailerService } from '@nestjs-modules/mailer';
+import { log } from 'handlebars';
 
 @Controller('/shopping-list')
 export class ShoppingListController {
   constructor(
     private readonly shoppingListService: ShoppingListService,
     private readonly userService: UserService,
-    private readonly mailerSevice: MailerService,
+    private readonly mailerService: MailerService,
   ) {}
 
   @Get('all')
@@ -44,7 +42,6 @@ export class ShoppingListController {
   async createOrder(
     @Body() order: ShoppingListType,
   ): Promise<ResponseData<ShoppingList | any>> {
-    console.log(order, 43);
     try {
       const userInformation = await this.userService.findByEmail(order.email);
       if (userInformation) {
@@ -63,6 +60,14 @@ export class ShoppingListController {
         };
         const newOrder = await this.shoppingListService.create(order);
         if (newOrder) {
+          await this.mailerService.sendMail({
+            to: newOrder.email,
+            subject: 'Thank you for shopping at LEIF SHOP.',
+            template: './pay-ment',
+            context: {
+              name: newOrder.buyerName,
+            },
+          });
           return new ResponseData<ShoppingList | boolean | any>(
             dataUser,
             HttpStatus.SUCCESS,

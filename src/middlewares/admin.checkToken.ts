@@ -10,7 +10,6 @@ export class CheckTokenAdminMiddleware implements NestMiddleware {
   constructor(private readonly jwtService: JwtService) {}
   use(req: Request, res: Response, next: NextFunction) {
     const token = req.headers.authorization;
-    console.log(token);
 
     if (token) {
       try {

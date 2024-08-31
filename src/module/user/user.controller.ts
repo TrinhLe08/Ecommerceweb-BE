@@ -17,6 +17,9 @@ import { ResponseData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { User } from '../../entities/user.entity';
 import { UserType } from 'src/utils/user.type';
+import { MailerService } from '@nestjs-modules/mailer';
+import { ConfirmCodeService } from './confirm-code.service';
+import { log } from 'handlebars';
 
 @Controller('/user')
 export class UserController {
@@ -24,6 +27,8 @@ export class UserController {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly confirmCodeService: ConfirmCodeService,
+    private mailerService: MailerService,
   ) {}
 
   @Get('all')
@@ -87,7 +92,15 @@ export class UserController {
         let newUser = user;
         newUser.password = this.jwtService.sign(user.password);
         const createUser = await this.userService.create(newUser);
-        console.log(createUser);
+
+        await this.mailerService.sendMail({
+          to: newUser.email,
+          subject: 'Welcome to my website',
+          template: './welcome',
+          context: {
+            name: newUser.email,
+          },
+        });
 
         return new ResponseData<User>(
           createUser,
@@ -120,7 +133,7 @@ export class UserController {
       } else {
         const userPassword = this.jwtService.verify(User.password);
         if (userPassword === user.password) {
-          const token: string = jwt.sign({ User }, 'key', { expiresIn: '4h' });
+          const token: string = jwt.sign({ User }, 'key', { expiresIn: '24h' });
           const returnInformation: {
             id: number;
             email: string;
@@ -149,7 +162,121 @@ export class UserController {
       }
     } catch (err) {
       console.log(err);
-      return;
+      return new ResponseData<string>(
+        'Wrong email or password',
+        HttpStatus.ERROR,
+        HttpMessage.ERROR,
+      );
+    }
+  }
+
+  @Post('confirm-mail')
+  async confirmMail(@Body() userMail: { mail: string }) {
+    try {
+      const User = await this.userService.findByEmail(userMail.mail);
+      if (User) {
+        const verificationCode = this.userService.createRandomCode(6);
+        await this.confirmCodeService.create({
+          code: verificationCode,
+        });
+        await this.mailerService.sendMail({
+          to: userMail.mail,
+          subject: 'Send a code .',
+          template: './confirm-password',
+          context: {
+            confirmCode: verificationCode,
+          },
+        });
+        return new ResponseData<boolean>(
+          true,
+          HttpStatus.ERROR,
+          HttpMessage.ERROR,
+        );
+      } else {
+        return new ResponseData<boolean>(
+          false,
+          HttpStatus.ERROR,
+          HttpMessage.ERROR,
+        );
+      }
+    } catch (err) {
+      console.log(err);
+      return new ResponseData<boolean>(
+        false,
+        HttpStatus.ERROR,
+        HttpMessage.ERROR,
+      );
+    }
+  }
+
+  @Post('confirm-code')
+  async confirmCode(@Body() CODE: { code: string }) {
+    try {
+      const confirm = await this.confirmCodeService.findCode(CODE.code);
+      if (confirm) {
+        await this.confirmCodeService.remove(confirm.id);
+        return new ResponseData<boolean>(
+          true,
+          HttpStatus.SUCCESS,
+          HttpMessage.SUCCESS,
+        );
+      } else {
+        return new ResponseData<boolean>(
+          false,
+          HttpStatus.ERROR,
+          HttpMessage.ERROR,
+        );
+      }
+    } catch (err) {
+      console.log(err);
+      return new ResponseData<boolean>(
+        false,
+        HttpStatus.ERROR,
+        HttpMessage.ERROR,
+      );
+    }
+  }
+
+  @Post('change-password')
+  async changePassword(
+    @Body() information: { email: string; newPassword: string },
+  ) {
+    try {
+      const checkUser = await this.userService.findByEmail(information.email);
+      if (checkUser) {
+        const tokenPassword = await this.jwtService.sign(
+          information.newPassword,
+        );
+        const change = await this.userService.updatePassword(
+          checkUser.id,
+          tokenPassword,
+        );
+        if (change) {
+          return new ResponseData<boolean>(
+            true,
+            HttpStatus.SUCCESS,
+            HttpMessage.SUCCESS,
+          );
+        } else {
+          return new ResponseData<boolean>(
+            false,
+            HttpStatus.ERROR,
+            HttpMessage.ERROR,
+          );
+        }
+      }
+      return new ResponseData<boolean>(
+        false,
+        HttpStatus.ERROR,
+        HttpMessage.ERROR,
+      );
+    } catch (err) {
+      console.log(err);
+      return new ResponseData<boolean>(
+        false,
+        HttpStatus.ERROR,
+        HttpMessage.ERROR,
+      );
     }
   }
 
