@@ -6,14 +6,17 @@ dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const port = process.env.PORT || 10000;
   app.enableCors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   });
   app.setGlobalPrefix('api/v1');
-  await app.listen(10000);
-
+  app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
+  })
+  
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => app.close());
