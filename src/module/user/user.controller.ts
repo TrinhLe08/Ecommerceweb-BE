@@ -189,8 +189,8 @@ export class UserController {
         });
         return new ResponseData<boolean>(
           true,
-          HttpStatus.ERROR,
-          HttpMessage.ERROR,
+          HttpStatus.SUCCESS,
+          HttpMessage.SUCCESS,
         );
       } else {
         return new ResponseData<boolean>(
