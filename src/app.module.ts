@@ -45,7 +45,7 @@ dotenv.config();
           },
         },
         defaults: {
-          from: `"No Reply" <${config.get('MAIL_FORM')}>`,
+          from: `"LEFT SHOP" <${config.get('MAIL_FORM')}>`,
         },
         template: {
           dir: join(__dirname, 'src/templates/email'),

@@ -93,14 +93,21 @@ export class UserController {
         newUser.password = this.jwtService.sign(user.password);
         const createUser = await this.userService.create(newUser);
 
-        await this.mailerService.sendMail({
-          to: newUser.email,
-          subject: 'Welcome to my website',
-          template: './welcome',
-          context: {
-            name: newUser.email,
-          },
-        });
+        this.mailerService
+          .sendMail({
+            to: newUser.email,
+            subject: 'Thank you for shopping at LEIF SHOP.',
+            template: './pay-ment',
+            context: {
+              name: newUser.email,
+            },
+          })
+          .then(() => {
+            console.log('Email sent successfully');
+          })
+          .catch((error) => {
+            console.error('Failed to send email:', error);
+          });
 
         return new ResponseData<User>(
           createUser,
@@ -133,7 +140,9 @@ export class UserController {
       } else {
         const userPassword = this.jwtService.verify(User.password);
         if (userPassword === user.password) {
-          const token: string = jwt.sign({ User }, 'key', { expiresIn: '24h' });
+          const token: string = jwt.sign({ User }, 'key', {
+            expiresIn: '24h',
+          });
           const returnInformation: {
             id: number;
             email: string;
@@ -187,6 +196,7 @@ export class UserController {
             confirmCode: verificationCode,
           },
         });
+
         return new ResponseData<boolean>(
           true,
           HttpStatus.SUCCESS,

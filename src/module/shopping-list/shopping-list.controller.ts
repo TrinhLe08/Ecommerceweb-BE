@@ -14,7 +14,6 @@ import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { ShoppingList } from 'src/entities/shoppingList.entity';
 import { ShoppingListType } from 'src/utils/shopping-list.type';
 import { MailerService } from '@nestjs-modules/mailer';
-import { log } from 'handlebars';
 
 @Controller('/shopping-list')
 export class ShoppingListController {
@@ -60,14 +59,21 @@ export class ShoppingListController {
         };
         const newOrder = await this.shoppingListService.create(order);
         if (newOrder) {
-          await this.mailerService.sendMail({
-            to: newOrder.email,
-            subject: 'Thank you for shopping at LEIF SHOP.',
-            template: './pay-ment',
-            context: {
-              name: newOrder.buyerName,
-            },
-          });
+          this.mailerService
+            .sendMail({
+              to: newOrder.email,
+              subject: 'Thank you for shopping at LEIF SHOP.',
+              template: './pay-ment',
+              context: {
+                name: newOrder.buyerName,
+              },
+            })
+            .then(() => {
+              console.log('Email sent successfully');
+            })
+            .catch((error) => {
+              console.error('Failed to send email:', error);
+            });
           return new ResponseData<ShoppingList | boolean | any>(
             dataUser,
             HttpStatus.SUCCESS,

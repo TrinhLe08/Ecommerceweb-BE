@@ -6,6 +6,7 @@ import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { AdminService } from './admin.service';
 import { Admin } from 'src/entities/admin.entity';
 import { AdminType } from 'src/utils/amdin.type';
+import { log } from 'handlebars';
 
 @Controller('/admin')
 export class AdminController {
@@ -49,6 +50,7 @@ export class AdminController {
             {
               name: informationAdmin.email,
               password: informationAdmin.password,
+              role: 'admin',
             },
             'key',
           );
@@ -71,6 +73,44 @@ export class AdminController {
         null,
         HttpStatus.SUCCESS,
         HttpMessage.SUCCESS,
+      );
+    }
+  }
+
+  @Post('check-token-admin')
+  async checkTokenAdmin(
+    @Body() tokenCheck: any,
+  ): Promise<ResponseData<boolean>> {
+    const token: string = tokenCheck.tokenCheck;
+    if (!token) {
+      return new ResponseData<boolean>(
+        false,
+        HttpStatus.ERROR,
+        HttpMessage.ERROR,
+      );
+    }
+    try {
+      const informationAamdin: any = this.jwtService.verify(token);
+      if (informationAamdin.role === 'admin') {
+        return new ResponseData<boolean>(
+          true,
+          HttpStatus.SUCCESS,
+          HttpMessage.SUCCESS,
+        );
+      } else {
+        return new ResponseData<boolean>(
+          false,
+          HttpStatus.ERROR,
+          HttpMessage.ERROR,
+        );
+      }
+      return;
+    } catch (err) {
+      console.log(err);
+      return new ResponseData<boolean>(
+        false,
+        HttpStatus.ERROR,
+        HttpMessage.ERROR,
       );
     }
   }
