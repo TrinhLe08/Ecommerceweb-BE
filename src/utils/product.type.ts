@@ -10,7 +10,7 @@ export type ProductType = {
   name: string;
   price: number;
   ratting: number;
-  status: boolean;
+  status: boolean | any;
   material: string;
   size: string;
   detail: string;

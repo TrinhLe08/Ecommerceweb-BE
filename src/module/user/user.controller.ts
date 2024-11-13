@@ -67,6 +67,8 @@ export class UserController {
   async registerUser(
     @Body() user: UserType,
   ): Promise<ResponseData<User | string>> {
+    console.log(user);
+
     try {
       if (
         user.hasOwnProperty('email') &&
@@ -188,14 +190,22 @@ export class UserController {
         await this.confirmCodeService.create({
           code: verificationCode,
         });
-        await this.mailerService.sendMail({
-          to: userMail.mail,
-          subject: 'Send a code .',
-          template: './confirm-password',
-          context: {
-            confirmCode: verificationCode,
-          },
-        });
+
+        this.mailerService
+          .sendMail({
+            to: userMail.mail,
+            subject: 'Send a code .',
+            template: './confirm-password',
+            context: {
+              confirmCode: verificationCode,
+            },
+          })
+          .then(() => {
+            console.log('Email sent successfully');
+          })
+          .catch((error) => {
+            console.error('Failed to send email:', error);
+          });
 
         return new ResponseData<boolean>(
           true,

@@ -18,7 +18,7 @@ export class ProductModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(CheckTokenAdminMiddleware)
-      .forRoutes('product/remove/:id', 'product/create', 'product/update')
+      .forRoutes('product/create', 'product/update')
       .apply(CheckTokenUserMiddleware)
       .forRoutes('product/comment');
   }

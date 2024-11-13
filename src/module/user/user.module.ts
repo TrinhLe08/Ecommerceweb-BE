@@ -27,7 +27,7 @@ export class UserModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(CheckTokenUserMiddleware)
-      .forRoutes('user/all', 'user/delete/:id', 'user/detail/:id');
+      .forRoutes('user/delete/:id', 'user/detail/:id');
   }
   private dataSource: DataSource;
 }

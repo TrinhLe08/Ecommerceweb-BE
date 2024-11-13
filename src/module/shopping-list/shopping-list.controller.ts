@@ -14,6 +14,7 @@ import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { ShoppingList } from 'src/entities/shoppingList.entity';
 import { ShoppingListType } from 'src/utils/shopping-list.type';
 import { MailerService } from '@nestjs-modules/mailer';
+import { log } from 'handlebars';
 
 @Controller('/shopping-list')
 export class ShoppingListController {
@@ -33,7 +34,7 @@ export class ShoppingListController {
         HttpMessage.SUCCESS,
       );
     } catch (err) {
-      return new ResponseData<null>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+      return new ResponseData<null>([], HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
 
@@ -87,15 +88,39 @@ export class ShoppingListController {
           );
         }
       } else {
-        return new ResponseData<string>(
-          'User not exist',
-          HttpStatus.ERROR,
-          HttpMessage.ERROR,
-        );
+        const newOrder = await this.shoppingListService.create(order);
+        if (newOrder) {
+          this.mailerService
+            .sendMail({
+              to: newOrder.email,
+              subject: 'Thank you for shopping at LEIF SHOP.',
+              template: './pay-ment',
+              context: {
+                name: newOrder.buyerName,
+              },
+            })
+            .then(() => {
+              console.log('Email sent successfully');
+            })
+            .catch((error) => {
+              console.error('Failed to send email:', error);
+            });
+          return new ResponseData<ShoppingList | boolean | any>(
+            {},
+            HttpStatus.SUCCESS,
+            HttpMessage.SUCCESS,
+          );
+        } else {
+          return new ResponseData<ShoppingList | boolean>(
+            false,
+            HttpStatus.ERROR,
+            HttpMessage.ERROR,
+          );
+        }
       }
     } catch (err) {
       console.log(err);
-      return new ResponseData<null>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+      return new ResponseData<null>([], HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
 
@@ -113,7 +138,7 @@ export class ShoppingListController {
       );
     } catch (err) {
       console.log(err);
-      return new ResponseData<null>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+      return new ResponseData<null>([], HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
 
@@ -140,7 +165,7 @@ export class ShoppingListController {
       }
     } catch (err) {
       console.log(err);
-      return new ResponseData<null>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+      return new ResponseData<null>([], HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
 }

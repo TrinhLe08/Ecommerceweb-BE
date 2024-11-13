@@ -15,6 +15,7 @@ import { ResponseData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { Product } from 'src/entities/product.entity';
 import { ProductType, UserComment } from 'src/utils/product.type';
+import { log } from 'handlebars';
 
 @Controller('/product')
 export class ProductController {
@@ -34,7 +35,7 @@ export class ProductController {
       );
     } catch (err) {
       console.log(err);
-      return new ResponseData<null>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+      return new ResponseData<null>([], HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
 
@@ -156,7 +157,15 @@ export class ProductController {
       const productDataToCreate = {
         urlProduct: ProductUrl.url,
         ...product,
+        comment: [],
       };
+      productDataToCreate.price = Number(productDataToCreate.price);
+      productDataToCreate.ratting = Number(productDataToCreate.ratting);
+      if (typeof productDataToCreate.status === 'string') {
+        productDataToCreate.status = productDataToCreate.status === 'true';
+      } else {
+        productDataToCreate.status = !!productDataToCreate.status;
+      }
       const newProduct = await this.productService.create(productDataToCreate);
       return new ResponseData<Product>(
         newProduct,
