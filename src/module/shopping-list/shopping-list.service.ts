@@ -19,8 +19,8 @@ export class ShoppingListService {
     return this.shoppingListRepository.find();
   }
 
-  async findOne(id: number): Promise<ShoppingList> {
-    return this.shoppingListRepository.findOne({ where: { id: id } });
+  async findAllByEmail(email: string): Promise<ShoppingList[]> {
+    return this.shoppingListRepository.find({ where: { email: email } });
   }
 
   async update(

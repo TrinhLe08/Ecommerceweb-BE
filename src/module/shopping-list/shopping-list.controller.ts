@@ -124,6 +124,26 @@ export class ShoppingListController {
     }
   }
 
+  @Post('user-oders')
+  async getOrderUser(
+    @Body() emailUser: { email: string },
+  ): Promise<ResponseData<ShoppingList[]>> {
+    try {
+      const allOrder = await this.shoppingListService.findAllByEmail(
+        emailUser.email,
+      );
+      console.log(emailUser);
+
+      return new ResponseData<ShoppingList[]>(
+        allOrder,
+        HttpStatus.SUCCESS,
+        HttpMessage.SUCCESS,
+      );
+    } catch (err) {
+      return new ResponseData<null>([], HttpStatus.ERROR, HttpMessage.ERROR);
+    }
+  }
+
   @Delete('remove/:id')
   async getDeleteOrder(
     @Param('id') id: number,

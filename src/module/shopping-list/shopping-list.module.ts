@@ -1,7 +1,4 @@
-import {
-  MiddlewareConsumer,
-  Module,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { ShoppingListController } from './shopping-list.controller';
@@ -24,7 +21,7 @@ export class ShoppingListModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(CheckTokenAdminMiddleware)
-      .forRoutes('shoppingList/all', 'shoppingList/remove/:id');
+      .forRoutes('shopping-list/all', 'shopping-list/remove/:id');
   }
   private dataSource: DataSource;
 }
