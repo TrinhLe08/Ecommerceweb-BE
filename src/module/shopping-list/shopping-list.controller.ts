@@ -132,8 +132,6 @@ export class ShoppingListController {
       const allOrder = await this.shoppingListService.findAllByEmail(
         emailUser.email,
       );
-      console.log(emailUser);
-
       return new ResponseData<ShoppingList[]>(
         allOrder,
         HttpStatus.SUCCESS,
