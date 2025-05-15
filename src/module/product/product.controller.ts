@@ -15,7 +15,6 @@ import { ResponseData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { Product } from 'src/entities/product.entity';
 import { ProductType, UserComment } from 'src/utils/product.type';
-import { log } from 'handlebars';
 
 @Controller('/product')
 export class ProductController {
