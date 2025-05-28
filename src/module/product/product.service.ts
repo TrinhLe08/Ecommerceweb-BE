@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from 'src/entities/product.entity';
 import { ProductType } from 'src/utils/product.type';
-import { log } from 'handlebars';
 
 @Injectable()
 export class ProductService {

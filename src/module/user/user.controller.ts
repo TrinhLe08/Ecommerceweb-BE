@@ -19,7 +19,6 @@ import { User } from '../../entities/user.entity';
 import { UserType } from 'src/utils/user.type';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfirmCodeService } from './confirm-code.service';
-import { log } from 'handlebars';
 
 @Controller('/user')
 export class UserController {

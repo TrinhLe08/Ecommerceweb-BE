@@ -16,6 +16,7 @@ import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { Product } from 'src/entities/product.entity';
 import { ProductType, UserComment } from 'src/utils/product.type';
 
+
 @Controller('/product')
 export class ProductController {
   constructor(
@@ -152,6 +153,8 @@ export class ProductController {
     @Body() product: Product,
   ): Promise<ResponseData<Product | string>> {
     try {
+      console.log(product);
+      
       const ProductUrl = await this.cloudinaryService.uploadFile(file);
       const productDataToCreate = {
         urlProduct: ProductUrl.url,
