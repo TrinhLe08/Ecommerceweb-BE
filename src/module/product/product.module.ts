@@ -6,7 +6,7 @@ import { Product } from 'src/entities/product.entity';
 import { DataSource } from 'typeorm';
 import { CheckTokenAdminMiddleware } from 'src/middlewares/admin.checkToken';
 import { JwtService } from 'src/global/gobalJwt';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { CloudinaryService } from 'src/external/cloudinary/cloudinary.service';
 import { CheckTokenUserMiddleware } from 'src/middlewares/user.checkToken';
 
 @Module({

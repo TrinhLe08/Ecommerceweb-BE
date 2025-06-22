@@ -10,7 +10,7 @@ import { ConfirmCode } from 'src/entities/confirmCode';
 import { User } from '../../entities/user.entity';
 import { CheckTokenUserMiddleware } from 'src/middlewares/user.checkToken';
 import { JwtService } from 'src/global/gobalJwt';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { CloudinaryService } from 'src/external/cloudinary/cloudinary.service';
 import { ConfirmCodeService } from './confirm-code.service';
 
 @Module({

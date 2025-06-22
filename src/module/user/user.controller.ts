@@ -12,7 +12,7 @@ import * as jwt from 'jsonwebtoken';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { JwtService } from 'src/global/gobalJwt';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { CloudinaryService } from 'src/external/cloudinary/cloudinary.service';
 import { ResponseData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { User } from '../../entities/user.entity';
@@ -66,8 +66,6 @@ export class UserController {
   async registerUser(
     @Body() user: UserType,
   ): Promise<ResponseData<User | string>> {
-    console.log(user);
-
     try {
       if (
         user.hasOwnProperty('email') &&
@@ -94,21 +92,25 @@ export class UserController {
         newUser.password = this.jwtService.sign(user.password);
         const createUser = await this.userService.create(newUser);
 
-        this.mailerService
-          .sendMail({
-            to: newUser.email,
-            subject: 'Thank you for shopping at LEIF SHOP.',
-            template: './pay-ment',
-            context: {
-              name: newUser.email,
-            },
-          })
-          .then(() => {
-            console.log('Email sent successfully');
-          })
-          .catch((error) => {
-            console.error('Failed to send email:', error);
-          });
+        if( createUser) {
+
+        }
+
+        // this.mailerService
+        //   .sendMail({
+        //     to: newUser.email,
+        //     subject: 'Thank you for shopping at LEIF SHOP.',
+        //     template: './pay-ment',
+        //     context: {
+        //       name: newUser.email,
+        //     },
+        //   })
+        //   .then(() => {
+        //     console.log('Email sent successfully');
+        //   })
+        //   .catch((error) => {
+        //     console.error('Failed to send email:', error);
+        //   });
 
         return new ResponseData<User>(
           createUser,

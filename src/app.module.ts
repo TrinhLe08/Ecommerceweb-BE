@@ -8,17 +8,18 @@ import { UserModule } from './module/user/user.module';
 import { ProductModule } from './module/product/product.module';
 import { ShoppingListModule } from './module/shopping-list/shopping-list.module';
 import { AdminModule } from './module/admin/admin.module';
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { CloudinaryModule } from './external/cloudinary/cloudinary.module';
 import { User } from './entities/user.entity';
 import { ConfirmCode } from './entities/confirmCode';
 import { Product } from './entities/product.entity';
 import { ShoppingList } from './entities/shoppingList.entity';
 import { Admin } from './entities/admin.entity';
-import { CloudinaryService } from './cloudinary/cloudinary.service';
+import { CloudinaryService } from './external/cloudinary/cloudinary.service';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { MailModule } from './external/mail/mail.module';
 dotenv.config();
 
 @Module({
@@ -33,30 +34,7 @@ dotenv.config();
       entities: [User, ConfirmCode, Product, ShoppingList, Admin],
       synchronize: true,
     }),
-    MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (config: ConfigService) => ({
-        transport: {
-          host: config.get('MAIL_HOST'),
-          secure: false,
-          auth: {
-            user: config.get('MAIL_USER'),
-            pass: config.get('MAIL_PASSWORD'),
-          },
-        },
-        defaults: {
-          from: `"LEFT SHOP" <${config.get('MAIL_FORM')}>`,
-        },
-        template: {
-          dir: join(__dirname, 'src/templates/email'),
-          adapter: new HandlebarsAdapter(),
-          options: {
-            strict: true,
-          },
-        },
-      }),
-      inject: [ConfigService],
-    }),
+    MailModule,
     UserModule,
     ProductModule,
     ShoppingListModule,
