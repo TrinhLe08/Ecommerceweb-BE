@@ -17,8 +17,8 @@ import { ResponseData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { User } from '../../entities/user.entity';
 import { UserType } from 'src/utils/user.type';
-import { MailerService } from '@nestjs-modules/mailer';
 import { ConfirmCodeService } from './confirm-code.service';
+import { MailService } from 'src/external/mail/mail.service';
 
 @Controller('/user')
 export class UserController {
@@ -27,7 +27,7 @@ export class UserController {
     private readonly jwtService: JwtService,
     private readonly cloudinaryService: CloudinaryService,
     private readonly confirmCodeService: ConfirmCodeService,
-    private mailerService: MailerService,
+    private mailerService: MailService,
   ) {}
 
   @Get('all')
@@ -93,7 +93,7 @@ export class UserController {
         const createUser = await this.userService.create(newUser);
 
         if( createUser) {
-
+          this.mailerService.sendWelComeConfirmation(newUser)
         }
 
         // this.mailerService
@@ -192,21 +192,21 @@ export class UserController {
           code: verificationCode,
         });
 
-        this.mailerService
-          .sendMail({
-            to: userMail.mail,
-            subject: 'Send a code .',
-            template: './confirm-password',
-            context: {
-              confirmCode: verificationCode,
-            },
-          })
-          .then(() => {
-            console.log('Email sent successfully');
-          })
-          .catch((error) => {
-            console.error('Failed to send email:', error);
-          });
+        // this.mailerService
+        //   .sendMail({
+        //     to: userMail.mail,
+        //     subject: 'Send a code .',
+        //     template: './confirm-password',
+        //     context: {
+        //       confirmCode: verificationCode,
+        //     },
+        //   })
+        //   .then(() => {
+        //     console.log('Email sent successfully');
+        //   })
+        //   .catch((error) => {
+        //     console.error('Failed to send email:', error);
+        //   });
 
         return new ResponseData<boolean>(
           true,

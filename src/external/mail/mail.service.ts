@@ -1,20 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { UserType } from 'src/utils/user.type';
+import { join } from 'path';
+// import welcom from '../templates/email/welcome.hbs';
 
 @Injectable()
 export class MailService {
   constructor(private readonly mailerService: MailerService) {}
 
-  async sendWelComeConfirmation(user: UserType, token: string): Promise<void> {
+  async sendWelComeConfirmation(user: UserType): Promise<void> {
+    console.log('Đường dẫn template thực tế:', join(__dirname, '../../templates/email/welcome.hbs'));
     let newUser = user
         this.mailerService
           .sendMail({
             to: newUser.email,
             subject: 'Thank you for shopping at LEIF SHOP.',
-            template: './pay-ment',
+            template: 'welcome',
             context: {
               name: newUser.email,
+            },
+          })
+          .then(() => {
+            console.log('Email sent successfully');
+          })
+          .catch((error) => {
+            console.error('Failed to send email:', error);
+          });
+  }
+
+  async sendConfirmCode(userMail: {mail:string}, verificationCode: string) {
+            this.mailerService
+          .sendMail({
+            to: userMail.mail,
+            subject: 'Send a code .',
+            template: './confirm-password',
+            context: {
+              confirmCode: verificationCode,
             },
           })
           .then(() => {

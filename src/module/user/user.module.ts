@@ -12,6 +12,7 @@ import { CheckTokenUserMiddleware } from 'src/middlewares/user.checkToken';
 import { JwtService } from 'src/global/gobalJwt';
 import { CloudinaryService } from 'src/external/cloudinary/cloudinary.service';
 import { ConfirmCodeService } from './confirm-code.service';
+import { MailService } from 'src/external/mail/mail.service';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { ConfirmCodeService } from './confirm-code.service';
     TypeOrmModule.forFeature([ConfirmCode]),
   ],
   controllers: [UserController],
-  providers: [UserService, ConfirmCodeService, JwtService, CloudinaryService],
+  providers: [UserService, ConfirmCodeService, JwtService, CloudinaryService, MailService],
 })
 export class UserModule {
   configure(consumer: MiddlewareConsumer) {

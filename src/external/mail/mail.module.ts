@@ -22,7 +22,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
             from: `"LEFT SHOP" <${config.get('MAIL_FORM')}>`,
           },
           template: {
-            dir: join(__dirname, 'src/templates/email'),
+            dir: join(__dirname, '../templates/email'),
             adapter: new HandlebarsAdapter(),
             options: {
               strict: true,
