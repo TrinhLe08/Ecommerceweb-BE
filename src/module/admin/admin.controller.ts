@@ -35,6 +35,8 @@ export class AdminController {
     @Body() dataLoginAdmin: AdminType,
   ): Promise<ResponseData<string>> {
     try {
+      console.log(dataLoginAdmin);
+      
       if (dataLoginAdmin.email && dataLoginAdmin.password) {
         const informationAdmin = await this.adminService.login(
           dataLoginAdmin.email,
@@ -68,7 +70,7 @@ export class AdminController {
         );
       }
     } catch (err) {
-      console.log(err, 'loginAdmin');
+      console.log(err, 'FROM loginAdmin');
       return new ResponseData<null>(
         null,
         HttpStatus.SUCCESS,

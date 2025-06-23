@@ -91,27 +91,9 @@ export class UserController {
         let newUser = user;
         newUser.password = this.jwtService.sign(user.password);
         const createUser = await this.userService.create(newUser);
-
         if( createUser) {
           this.mailerService.sendWelComeConfirmation(newUser)
         }
-
-        // this.mailerService
-        //   .sendMail({
-        //     to: newUser.email,
-        //     subject: 'Thank you for shopping at LEIF SHOP.',
-        //     template: './pay-ment',
-        //     context: {
-        //       name: newUser.email,
-        //     },
-        //   })
-        //   .then(() => {
-        //     console.log('Email sent successfully');
-        //   })
-        //   .catch((error) => {
-        //     console.error('Failed to send email:', error);
-        //   });
-
         return new ResponseData<User>(
           createUser,
           HttpStatus.SUCCESS,
@@ -125,7 +107,7 @@ export class UserController {
         );
       }
     } catch (err) {
-      console.log(err);
+      console.log(err, "FROM registerUser");
       return new ResponseData<null>(null, HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
@@ -191,23 +173,7 @@ export class UserController {
         await this.confirmCodeService.create({
           code: verificationCode,
         });
-
-        // this.mailerService
-        //   .sendMail({
-        //     to: userMail.mail,
-        //     subject: 'Send a code .',
-        //     template: './confirm-password',
-        //     context: {
-        //       confirmCode: verificationCode,
-        //     },
-        //   })
-        //   .then(() => {
-        //     console.log('Email sent successfully');
-        //   })
-        //   .catch((error) => {
-        //     console.error('Failed to send email:', error);
-        //   });
-
+        this.mailerService.sendConfirmCode(userMail, verificationCode)
         return new ResponseData<boolean>(
           true,
           HttpStatus.SUCCESS,
@@ -221,7 +187,7 @@ export class UserController {
         );
       }
     } catch (err) {
-      console.log(err);
+      console.log(err, "FROM confirmMail");
       return new ResponseData<boolean>(
         false,
         HttpStatus.ERROR,

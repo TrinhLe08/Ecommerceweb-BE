@@ -1,15 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { UserType } from 'src/utils/user.type';
-import { join } from 'path';
-// import welcom from '../templates/email/welcome.hbs';
 
 @Injectable()
 export class MailService {
   constructor(private readonly mailerService: MailerService) {}
 
   async sendWelComeConfirmation(user: UserType): Promise<void> {
-    console.log('Đường dẫn template thực tế:', join(__dirname, '../../templates/email/welcome.hbs'));
     let newUser = user
         this.mailerService
           .sendMail({
@@ -29,11 +26,11 @@ export class MailService {
   }
 
   async sendConfirmCode(userMail: {mail:string}, verificationCode: string) {
-            this.mailerService
+        this.mailerService
           .sendMail({
             to: userMail.mail,
             subject: 'Send a code .',
-            template: './confirm-password',
+            template: 'confirm-password',
             context: {
               confirmCode: verificationCode,
             },
