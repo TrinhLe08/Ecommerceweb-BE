@@ -15,11 +15,9 @@ import { Product } from './entities/product.entity';
 import { ShoppingList } from './entities/shoppingList.entity';
 import { Admin } from './entities/admin.entity';
 import { CloudinaryService } from './external/cloudinary/cloudinary.service';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { join } from 'path';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { MailModule } from './external/mail/mail.module';
+import { ThrottlerModule, ThrottlerGuard   } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core'
 dotenv.config();
 
 @Module({
@@ -34,6 +32,12 @@ dotenv.config();
       entities: [User, ConfirmCode, Product, ShoppingList, Admin],
       synchronize: true,
     }),
+    ThrottlerModule.forRoot({
+      throttlers: [{
+        ttl: 60000,  //60s
+        limit: 10,
+      }]
+    }),
     MailModule,
     UserModule,
     ProductModule,
@@ -42,7 +46,11 @@ dotenv.config();
     CloudinaryModule,
   ],
   controllers: [AppController],
-  providers: [AppService, CloudinaryService],
+  providers: [AppService, CloudinaryService, {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard ,
+    },
+],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}
