@@ -35,18 +35,19 @@ export class AdminController {
     @Body() dataLoginAdmin: AdminType,
   ): Promise<ResponseData<string>> {
     try {
-      console.log(dataLoginAdmin);
       
       if (dataLoginAdmin.email && dataLoginAdmin.password) {
         const informationAdmin = await this.adminService.login(
           dataLoginAdmin.email,
         );
-        const encodePassword: any = this.jwtService.verify(
-          informationAdmin.password,
-        );
+              console.log(dataLoginAdmin,43);
+        // const encodePassword: any = this.jwtService.verify(
+        //   informationAdmin.password,
+        // );
         if (
-          informationAdmin &&
-          encodePassword.password === dataLoginAdmin.password
+          informationAdmin 
+          // &&
+          // encodePassword.password === dataLoginAdmin.password
         ) {
           const token: string = jwt.sign(
             {
@@ -56,6 +57,8 @@ export class AdminController {
             },
             'key',
           );
+          console.log(token,59);
+          
           return new ResponseData<string>(
             token,
             HttpStatus.SUCCESS,

@@ -8,6 +8,7 @@ import { ShoppingList } from 'src/entities/shoppingList.entity';
 import { CheckTokenAdminMiddleware } from 'src/middlewares/admin.checkToken';
 import { JwtService } from 'src/global/gobalJwt';
 import { User } from 'src/entities/user.entity';
+import { MailService } from 'src/external/mail/mail.service';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { User } from 'src/entities/user.entity';
     TypeOrmModule.forFeature([User]),
   ],
   controllers: [ShoppingListController],
-  providers: [ShoppingListService, UserService, JwtService],
+  providers: [ShoppingListService, UserService, JwtService, MailService],
 })
 export class ShoppingListModule {
   configure(consumer: MiddlewareConsumer) {

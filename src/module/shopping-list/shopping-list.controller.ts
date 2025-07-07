@@ -13,15 +13,15 @@ import { ResponseData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { ShoppingList } from 'src/entities/shoppingList.entity';
 import { ShoppingListType } from 'src/utils/shopping-list.type';
-import { MailerService } from '@nestjs-modules/mailer';
-import { log } from 'handlebars';
+import { MailService } from 'src/external/mail/mail.service';
+import { log } from 'console';
 
 @Controller('/shopping-list')
 export class ShoppingListController {
   constructor(
     private readonly shoppingListService: ShoppingListService,
     private readonly userService: UserService,
-    private readonly mailerService: MailerService,
+    private readonly mailerService: MailService,
   ) {}
 
   @Get('all')
@@ -60,21 +60,7 @@ export class ShoppingListController {
         };
         const newOrder = await this.shoppingListService.create(order);
         if (newOrder) {
-          this.mailerService
-            .sendMail({
-              to: newOrder.email,
-              subject: 'Thank you for shopping at LEIF SHOP.',
-              template: './pay-ment',
-              context: {
-                name: newOrder.buyerName,
-              },
-            })
-            .then(() => {
-              console.log('Email sent successfully');
-            })
-            .catch((error) => {
-              console.error('Failed to send email:', error);
-            });
+          this.mailerService.sendNotificationPayMent(newOrder.email)
           return new ResponseData<ShoppingList | boolean | any>(
             dataUser,
             HttpStatus.SUCCESS,
@@ -83,28 +69,14 @@ export class ShoppingListController {
         } else {
           return new ResponseData<ShoppingList | boolean>(
             false,
-            HttpStatus.SUCCESS,
-            HttpMessage.SUCCESS,
+            HttpStatus.ERROR,
+            HttpMessage.ERROR,
           );
         }
       } else {
         const newOrder = await this.shoppingListService.create(order);
         if (newOrder) {
-          this.mailerService
-            .sendMail({
-              to: newOrder.email,
-              subject: 'Thank you for shopping at LEIF SHOP.',
-              template: './pay-ment',
-              context: {
-                name: newOrder.buyerName,
-              },
-            })
-            .then(() => {
-              console.log('Email sent successfully');
-            })
-            .catch((error) => {
-              console.error('Failed to send email:', error);
-            });
+           this.mailerService.sendNotificationPayMent(newOrder.email)
           return new ResponseData<ShoppingList | boolean | any>(
             {},
             HttpStatus.SUCCESS,
@@ -119,7 +91,7 @@ export class ShoppingListController {
         }
       }
     } catch (err) {
-      console.log(err);
+      console.log(err, "FROM createOrder");
       return new ResponseData<null>([], HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
@@ -138,6 +110,7 @@ export class ShoppingListController {
         HttpMessage.SUCCESS,
       );
     } catch (err) {
+      console.log(err, "FROM getOrderUser");
       return new ResponseData<null>([], HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }

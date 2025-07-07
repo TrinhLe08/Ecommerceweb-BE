@@ -116,7 +116,7 @@ export class ProductController {
     try {
       const allProduct = await this.productService.getAll();
       const allKitchen = allProduct.filter((product: ProductType) => {
-        return product.status === false;
+        return product.status === true;
       });
       return new ResponseData<Product[]>(
         allKitchen,
@@ -153,8 +153,6 @@ export class ProductController {
     @Body() product: Product,
   ): Promise<ResponseData<Product | string>> {
     try {
-      console.log(product);
-      
       const ProductUrl = await this.cloudinaryService.uploadFile(file);
       const productDataToCreate = {
         urlProduct: ProductUrl.url,
@@ -163,11 +161,8 @@ export class ProductController {
       };
       productDataToCreate.price = Number(productDataToCreate.price);
       productDataToCreate.ratting = Number(productDataToCreate.ratting);
-      if (typeof productDataToCreate.status === 'string') {
-        productDataToCreate.status = productDataToCreate.status === 'true';
-      } else {
-        productDataToCreate.status = !!productDataToCreate.status;
-      }
+      productDataToCreate.status = Boolean(productDataToCreate.status);
+      
       const newProduct = await this.productService.create(productDataToCreate);
       return new ResponseData<Product>(
         newProduct,
@@ -188,21 +183,22 @@ export class ProductController {
   ): Promise<ResponseData<Product | string>> {
     try {
       if (file) {
-        const { id, ...newPorductToUpdate } = newProduct;
+        const { id, ...newProductToUpdate } = newProduct;
+                console.log(newProduct,192);
         const ProductUrl = await this.cloudinaryService.uploadFile(file);
         const product = await this.productService.findOne(id);
         const dataToUpdate: ProductType = {
-          detail: newPorductToUpdate.detail,
-          item: newPorductToUpdate.item,
-          name: newPorductToUpdate.name,
+          detail: newProductToUpdate.detail,
+          item: newProductToUpdate.item,
+          name: newProductToUpdate.name,
           ratting: product.ratting,
           urlProduct: ProductUrl.url,
-          origin: newPorductToUpdate.origin,
-          price: newPorductToUpdate.price,
-          size: newPorductToUpdate.size,
-          status: newPorductToUpdate.status,
-          material: newPorductToUpdate.material,
-          comment: newPorductToUpdate.comment,
+          origin: newProductToUpdate.origin,
+          price: newProductToUpdate.price,
+          size: newProductToUpdate.size,
+          status: Boolean(newProductToUpdate.status),
+          material: newProductToUpdate.material,
+          comment: newProductToUpdate.comment,
         };
         if (product) {
           const updatePorduct = await this.productService.update(
@@ -222,13 +218,17 @@ export class ProductController {
           );
         }
       } else {
-        const { id, ...newPorductToUpdate } = newProduct;
+        const { id, ...newProductToUpdate } = newProduct;
+        newProductToUpdate.status = Boolean(newProductToUpdate.status)
+        console.log(newProductToUpdate,227);
         const product = await this.productService.findOne(id);
         if (product) {
           const updatePorduct = await this.productService.update(
             id,
-            newPorductToUpdate,
+            newProductToUpdate,
           );
+          console.log(updatePorduct, 234);
+          
           return new ResponseData<Product>(
             updatePorduct,
             HttpStatus.SUCCESS,

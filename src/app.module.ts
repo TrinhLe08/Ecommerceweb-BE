@@ -35,7 +35,7 @@ dotenv.config();
     ThrottlerModule.forRoot({
       throttlers: [{
         ttl: 60000,  //60s
-        limit: 10,
+        limit: 100,
       }]
     }),
     MailModule,
