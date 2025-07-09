@@ -150,7 +150,7 @@ export class ProductController {
   @UseInterceptors(FileInterceptor('urlProduct'))
   async createProduct(
     @UploadedFile() file: Express.Multer.File,
-    @Body() product: Product,
+    @Body() product: Product | any,
   ): Promise<ResponseData<Product | string>> {
     try {
       const ProductUrl = await this.cloudinaryService.uploadFile(file);
@@ -161,8 +161,11 @@ export class ProductController {
       };
       productDataToCreate.price = Number(productDataToCreate.price);
       productDataToCreate.ratting = Number(productDataToCreate.ratting);
-      productDataToCreate.status = Boolean(productDataToCreate.status);
-      
+      if (typeof productDataToCreate.status === 'string') {
+          productDataToCreate.status = JSON.parse(productDataToCreate.status.toLowerCase());
+         } else {
+          productDataToCreate.status = Boolean(productDataToCreate.status);
+        }
       const newProduct = await this.productService.create(productDataToCreate);
       return new ResponseData<Product>(
         newProduct,
@@ -179,7 +182,7 @@ export class ProductController {
   @UseInterceptors(FileInterceptor('urlProduct'))
   async updateDetailProduct(
     @UploadedFile() file: Express.Multer.File,
-    @Body() newProduct: Product,
+    @Body() newProduct: Product | any,
   ): Promise<ResponseData<Product | string>> {
     try {
       if (file) {
@@ -196,7 +199,7 @@ export class ProductController {
           origin: newProductToUpdate.origin,
           price: newProductToUpdate.price,
           size: newProductToUpdate.size,
-          status: Boolean(newProductToUpdate.status),
+          status: JSON.parse(newProductToUpdate.status.toLowerCase()),
           material: newProductToUpdate.material,
           comment: newProductToUpdate.comment,
         };
@@ -218,10 +221,16 @@ export class ProductController {
           );
         }
       } else {
-        const { id, ...newProductToUpdate } = newProduct;
-        newProductToUpdate.status = Boolean(newProductToUpdate.status)
-        console.log(newProductToUpdate,227);
-        const product = await this.productService.findOne(id);
+        const { id, ...newProductToUpdate } = newProduct
+        console.log(newProductToUpdate,222);
+        
+       if (typeof newProductToUpdate.status === 'string') {
+          newProductToUpdate.status = JSON.parse(newProductToUpdate.status.toLowerCase());
+         } else {
+          newProductToUpdate.status = Boolean(newProductToUpdate.status);
+        }
+        console.log(newProductToUpdate,227)
+        const product = await this.productService.findOne(id)
         if (product) {
           const updatePorduct = await this.productService.update(
             id,
