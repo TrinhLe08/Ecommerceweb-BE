@@ -13,6 +13,9 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
           transport: {
             host: config.get('MAIL_HOST'),
             secure: false,
+            tls:  {
+              rejectUnauthorized: false, // ⚠️ TẮT kiểm tra chứng chỉ (KHÔNG dùng cho production)
+            },
             auth: {
               user: config.get('MAIL_USER'),
               pass: config.get('MAIL_PASSWORD'),
