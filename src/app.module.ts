@@ -18,6 +18,7 @@ import { CloudinaryService } from './external/cloudinary/cloudinary.service';
 import { MailModule } from './external/mail/mail.module';
 import { ThrottlerModule, ThrottlerGuard   } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core'
+import { RabbitMQModule } from './external/rabbitMQ/rabbitmq.module';
 dotenv.config();
 
 @Module({
@@ -44,6 +45,7 @@ dotenv.config();
     ShoppingListModule,
     AdminModule,
     CloudinaryModule,
+    RabbitMQModule
   ],
   controllers: [AppController],
   providers: [AppService, CloudinaryService, {
@@ -51,6 +53,7 @@ dotenv.config();
       useClass: ThrottlerGuard ,
     },
 ],
+ exports: [RabbitMQModule],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}
