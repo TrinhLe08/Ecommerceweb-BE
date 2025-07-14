@@ -11,10 +11,13 @@ export class RabbitMQService implements OnModuleInit {
   private isInitialized = false;
   private initPromise: Promise<void>;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {
+        this.initPromise = this.Connect();
+  }
 
   async onModuleInit() {
-    await this.Connect();
+    //   await this.waitForInit();
+      await this.Connect();
   }
 
   async waitForInit(): Promise<void> {
@@ -23,7 +26,7 @@ export class RabbitMQService implements OnModuleInit {
     }
   }
 
-  private async Connect() {
+private async Connect() {
     const url = this.configService.get<string>('RABBIT_MQ_URL');
     this.connection = connect([url]);
 
@@ -37,7 +40,7 @@ export class RabbitMQService implements OnModuleInit {
     await this.channelWrapper.waitForConnect();
     this.isInitialized = true;
     console.log('RabbitMQ connected!');
-  }
+}
 
 async sendToQueue(
   queue: string,
@@ -70,7 +73,9 @@ async sendToQueue(
 
 async consumeReceiveToQueue(queue: string, callback: (msg: any) => void) {
   await this.waitForInit();
-  
+      if (!this.channelWrapper) {
+      throw new Error('RabbitMQ channel not initialized');
+    }
   try {
     await this.channelWrapper.addSetup(async (channel: amqp.Channel) => {
       // Khai báo queue trước khi consume
