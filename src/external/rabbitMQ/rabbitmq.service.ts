@@ -16,7 +16,6 @@ export class RabbitMQService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    //   await this.waitForInit();
       await this.Connect();
   }
 
@@ -57,7 +56,7 @@ async sendToQueue(
     await this.channelWrapper.sendToQueue(queue, Buffer.from(JSON.stringify(message)), {
       persistent: true
     } as any);
-      return; // Thành công thì thoát
+      return;
     } catch (error) {
       lastError = error;
       console.error(`Attempt ${attempt} failed for ${queue}:`, error);
@@ -78,14 +77,12 @@ async consumeReceiveToQueue(queue: string, callback: (msg: any) => void) {
     }
   try {
     await this.channelWrapper.addSetup(async (channel: amqp.Channel) => {
-      // Khai báo queue trước khi consume
       await channel.assertQueue(queue, {
-        durable: true,  // Giữ queue khi server restart
+        durable: true, 
         arguments: {
-          'x-queue-type': 'classic' // Hoặc 'quorum' nếu dùng RabbitMQ 3.8+
+          'x-queue-type': 'classic' 
         }
       });
-      
       return channel.consume(queue, (message) => {
         if (message) {
           const content = JSON.parse(message.content.toString());
