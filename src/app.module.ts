@@ -19,6 +19,8 @@ import { MailModule } from './external/mail/mail.module';
 import { ThrottlerModule, ThrottlerGuard   } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core'
 import { RabbitMQModule } from './external/rabbitMQ/rabbitmq.module';
+import { AuthModule } from './module/auth/auth.module';
+import { AuthController } from './module/auth/auth.controller';
 dotenv.config();
 
 @Module({
@@ -45,9 +47,10 @@ dotenv.config();
     ShoppingListModule,
     AdminModule,
     CloudinaryModule,
-    RabbitMQModule
+    RabbitMQModule,
+    AuthModule
   ],
-  controllers: [AppController],
+  controllers: [AppController, AuthController],
   providers: [AppService, CloudinaryService, {
       provide: APP_GUARD,
       useClass: ThrottlerGuard ,
