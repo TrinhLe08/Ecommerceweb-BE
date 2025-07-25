@@ -7,15 +7,15 @@ export class AuthController {
   @Get('facebook')
   @UseGuards(AuthGuard('facebook'))
   async facebookLogin(): Promise<any> {
-    // The passport middleware will redirect to Facebook
   }
 
-  @Get('facebook/redirect')
+  @Get('facebook/redirect') 
   @UseGuards(AuthGuard('facebook'))
-  async facebookLoginCallback(@Req() req: Request, @Res() res: Response) {
-    // Handle the response after Facebook authentication
-    // For example, create JWT token or session
-    // Here we just redirect with the user info
-    res.redirect(`/profile?user=${JSON.stringify(req.user)}`);
+  async facebookRedirect(@Req() req, @Res() res) {
+    const user = req.user; 
+    console.log('User data:', user);
+    
+    // Redirect về FE kèm dữ liệu (ví dụ: token)
+    res.redirect(`http://localhost:3000?token=${user.accessToken}`);
   }
 }
