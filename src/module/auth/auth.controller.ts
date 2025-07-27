@@ -1,21 +1,99 @@
 import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Request, Response } from 'express';
+import * as jwt from 'jsonwebtoken';
+import { UserService } from '../user/user.service';
+import { UserType } from 'src/utils/user.type';
+import { MailService } from 'src/external/mail/mail.service';
+
 
 @Controller('auth')
 export class AuthController {
+  constructor(
+    private readonly userService: UserService,
+    private mailerService: MailService,
+
+  ) { }
+
   @Get('facebook')
   @UseGuards(AuthGuard('facebook'))
   async facebookLogin(): Promise<any> {
   }
 
-  @Get('facebook/redirect') 
+  @Get('facebook/redirect')
   @UseGuards(AuthGuard('facebook'))
   async facebookRedirect(@Req() req, @Res() res) {
-    const user = req.user; 
-    console.log('User data:', user);
-    
-    // Redirect về FE kèm dữ liệu (ví dụ: token)
-    res.redirect(`http://localhost:3000?token=${user.accessToken}`);
+    try {
+      const informationUser = req.user;
+      const emailUser = informationUser.email
+      const User = await this.userService.findByEmail(emailUser);
+
+      if (User) {
+        const token: string = jwt.sign({ informationUser }, 'key', {
+          expiresIn: '24h',
+        });
+        const returnInformation: {
+          id: number;
+          email: string;
+          urlAvatar: string;
+          name: string,
+          token: string;
+          bought: number[];
+        } = {
+          id: User.id,
+          email: informationUser.email,
+          urlAvatar: informationUser.picture,
+          name: informationUser.name,
+          token,
+          bought: User.bought,
+        };
+        const dataString = encodeURIComponent(JSON.stringify(returnInformation));
+        res.redirect(`http://localhost:3000?token=${dataString}`);
+        return
+      } else {
+        const informationRegister: UserType = {
+          email: emailUser,
+          password: "",
+          urlAvatar: informationUser.picture,
+          name: informationUser.name,
+          phoneNumber: "",
+          country: "",
+          city: "",
+          address: "",
+          spent: 0,
+          point: 0,
+          bought: [],
+          role: "user",
+        };
+        const createUser = await this.userService.create(informationRegister);
+        if (createUser) {
+          const token: string = jwt.sign({ informationUser }, 'key', {
+            expiresIn: '24h',
+          });
+          this.mailerService.sendWelComeConfirmation(informationRegister)
+          const returnInformation: {
+            id: number;
+            email: string;
+            urlAvatar: string;
+            name: string,
+            token: string;
+            bought: number[];
+          } = {
+            id: createUser.id,
+            email: informationUser.email,
+            urlAvatar: informationUser.picture,
+            name: informationUser.name,
+            token,
+            bought: [0],
+          };
+          const dataString = encodeURIComponent(JSON.stringify(returnInformation));
+          res.redirect(`http://localhost:3000?token=${dataString}`);
+        }
+        return
+      }
+    } catch (err) {
+      console.log(err, "FROM FACEBOOK/REDIRECT");
+      return
+    }
+
   }
 }

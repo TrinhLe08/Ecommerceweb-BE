@@ -50,7 +50,7 @@ dotenv.config();
     RabbitMQModule,
     AuthModule
   ],
-  controllers: [AppController, AuthController],
+  controllers: [AppController],
   providers: [AppService, CloudinaryService, {
       provide: APP_GUARD,
       useClass: ThrottlerGuard ,

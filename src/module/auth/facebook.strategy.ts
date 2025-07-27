@@ -9,7 +9,6 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     super({
       clientID: process.env.FACEBOOK_APP_ID,
       clientSecret: process.env.FACEBOOK_APP_SECRET,
-      // callbackURL: process.env.FACEBOOK_APP_REDIRECT_LOGIN,
       callbackURL: 'http://localhost:10000/api/v1/auth/facebook/redirect',
       scope: 'email',
       profileFields: ['emails', 'name', 'displayName', 'photos'],
@@ -23,11 +22,9 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     done: (err: any, user: any, info?: any) => void,
   ): Promise<any> {
     const { name, emails, photos } = profile;
-    console.log(profile);
     const user = {
       email: emails[0].value,
-      firstName: name.givenName,
-      lastName: name.familyName,
+      name : `${name.givenName} ${name.familyName}`,
       picture: photos[0].value,
       accessToken,
     };
