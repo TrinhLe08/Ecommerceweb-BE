@@ -6,10 +6,11 @@ import { AuthController } from './auth.controller';
 import { UserService } from '../user/user.service';
 import { User } from 'src/entities/user.entity';
 import { MailService } from 'src/external/mail/mail.service';
+import { GoogleStrategy } from './google.strategy';
 
 @Module({
-  imports: [PassportModule,TypeOrmModule.forFeature([User]),],
+  imports: [PassportModule, TypeOrmModule.forFeature([User]),],
   controllers: [AuthController],
-  providers: [FacebookStrategy, UserService, MailService],
+  providers: [FacebookStrategy, GoogleStrategy, UserService, MailService],
 })
-export class AuthModule {}
+export class AuthModule { }

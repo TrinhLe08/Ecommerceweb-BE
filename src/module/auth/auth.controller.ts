@@ -16,8 +16,7 @@ export class AuthController {
 
   @Get('facebook')
   @UseGuards(AuthGuard('facebook'))
-  async facebookLogin(): Promise<any> {
-  }
+  async facebookLogin(): Promise<any> { }
 
   @Get('facebook/redirect')
   @UseGuards(AuthGuard('facebook'))
@@ -41,8 +40,8 @@ export class AuthController {
         } = {
           id: User.id,
           email: informationUser.email,
-          urlAvatar: informationUser.picture,
-          name: informationUser.name,
+          urlAvatar: User.urlAvatar,
+          name:  User.name,
           token,
           bought: User.bought,
         };
@@ -94,6 +93,83 @@ export class AuthController {
       console.log(err, "FROM FACEBOOK/REDIRECT");
       return
     }
+  }
 
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() { }
+
+  @Get('google/redirect')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req, @Res() res) {
+    if (!req.user) {
+      return 'No user from google';
+    }
+    const informationUser = req.user;
+    const emailUser = informationUser.email
+    const User = await this.userService.findByEmail(emailUser);
+    if (User) {
+      const token: string = jwt.sign({ informationUser }, 'key', {
+        expiresIn: '24h',
+      });
+      const returnInformation: {
+        id: number;
+        email: string;
+        urlAvatar: string;
+        name: string,
+        token: string;
+        bought: number[];
+      } = {
+        id: User.id,
+        email: User.email,
+        urlAvatar: User.urlAvatar,
+        name: User.name,
+        token,
+        bought: User.bought,
+      };
+      const dataString = encodeURIComponent(JSON.stringify(returnInformation));
+      res.redirect(`http://localhost:3000?token=${dataString}`);
+      return
+    } else {
+      const informationRegister: UserType = {
+        email: emailUser,
+        password: "",
+        urlAvatar: informationUser.picture,
+        name: informationUser.name,
+        phoneNumber: "",
+        country: "",
+        city: "",
+        address: "",
+        spent: 0,
+        point: 0,
+        bought: [],
+        role: "user",
+      };
+      const createUser = await this.userService.create(informationRegister);
+      if (createUser) {
+        const token: string = jwt.sign({ informationUser }, 'key', {
+          expiresIn: '24h',
+        });
+        this.mailerService.sendWelComeConfirmation(informationRegister)
+        const returnInformation: {
+          id: number;
+          email: string;
+          urlAvatar: string;
+          name: string,
+          token: string;
+          bought: number[];
+        } = {
+          id: createUser.id,
+          email: informationUser.email,
+          urlAvatar: informationUser.picture,
+          name: informationUser.name,
+          token,
+          bought: [0],
+        };
+        const dataString = encodeURIComponent(JSON.stringify(returnInformation));
+        res.redirect(`http://localhost:3000?token=${dataString}`);
+      }
+      return
+    }
   }
 }
