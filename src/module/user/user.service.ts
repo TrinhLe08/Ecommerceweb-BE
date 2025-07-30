@@ -10,7 +10,7 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async create(user: UserType): Promise<User> {
     return this.userRepository.save(user);
@@ -28,6 +28,11 @@ export class UserService {
     return this.userRepository.findOne({ where: { email: email } });
   }
 
+  async findByPhoneNumber(phoneNumber: string): Promise<User> {
+    return this.userRepository.findOne({ where: { phoneNumber: phoneNumber } });
+  }
+
+
   createRandomCode(length: number): string {
     const code = crypto
       .randomBytes(Math.ceil(length / 2))
@@ -44,7 +49,7 @@ export class UserService {
   async updatePassword(id: number, newPassword: string): Promise<User> {
     await this.userRepository.update(id, { password: newPassword });
     return this.userRepository.findOne({ where: { id: id } });
-}
+  }
 
   async remove(id: number): Promise<void> {
     await this.userRepository.delete(id);
