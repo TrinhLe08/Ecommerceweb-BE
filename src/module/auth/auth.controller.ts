@@ -5,13 +5,11 @@ import { UserService } from '../user/user.service';
 import { UserType } from 'src/utils/user.type';
 import { MailService } from 'src/external/mail/mail.service';
 
-
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly userService: UserService,
     private mailerService: MailService,
-
   ) { }
 
   @Get('facebook')
@@ -24,9 +22,14 @@ export class AuthController {
     try {
       const informationUser = req.user;
       const emailUser = informationUser.email
-      const User = await this.userService.findByEmail(emailUser);
+      const checkNoMail = `${informationUser.idFaceBook}@facebook.nomail`
+      const User = await this.userService.findByEmail(emailUser)
+        || (checkNoMail && await this.userService.findByEmail(checkNoMail));
 
       if (User) {
+        if (emailUser != checkNoMail && User.id && User.email !== emailUser) {
+          await this.userService.updateEmail(User.id, emailUser)
+        }
         const token: string = jwt.sign({ informationUser }, 'key', {
           expiresIn: '24h',
         });

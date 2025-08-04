@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DataSource } from 'typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { UserModule } from './module/user/user.module';
 import { ProductModule } from './module/product/product.module';
 import { ShoppingListModule } from './module/shopping-list/shopping-list.module';
@@ -16,15 +17,15 @@ import { ShoppingList } from './entities/shoppingList.entity';
 import { Admin } from './entities/admin.entity';
 import { CloudinaryService } from './external/cloudinary/cloudinary.service';
 import { MailModule } from './external/mail/mail.module';
-import { ThrottlerModule, ThrottlerGuard   } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core'
 import { RabbitMQModule } from './external/rabbitMQ/rabbitmq.module';
 import { AuthModule } from './module/auth/auth.module';
-import { AuthController } from './module/auth/auth.controller';
 dotenv.config();
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST,
@@ -52,12 +53,12 @@ dotenv.config();
   ],
   controllers: [AppController],
   providers: [AppService, CloudinaryService, {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard ,
-    },
-],
- exports: [RabbitMQModule],
+    provide: APP_GUARD,
+    useClass: ThrottlerGuard,
+  },
+  ],
+  exports: [RabbitMQModule],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
 }

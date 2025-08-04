@@ -30,7 +30,7 @@ export class UserService {
 
   async findByPhoneNumber(phoneNumber: string): Promise<User> {
     return this.userRepository.findOne({ where: { phoneNumber: phoneNumber } });
-  }
+  } 
 
 
   createRandomCode(length: number): string {
@@ -44,6 +44,11 @@ export class UserService {
   async update(id: number, newUser: UserType): Promise<User> {
     await this.userRepository.update(id, newUser);
     return this.userRepository.findOne({ where: { id: id } });
+  }
+
+  async updateEmail(id: number, newEmail: string): Promise<User> {
+    await this.userRepository.update(id, { email: newEmail });
+    return this.userRepository.findOne({ where: { id } });
   }
 
   async updatePassword(id: number, newPassword: string): Promise<User> {

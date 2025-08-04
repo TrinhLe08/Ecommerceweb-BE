@@ -7,4 +7,7 @@ export class ConfirmCode extends BaseEntity {
 
   @Column()
   code: string;
+
+  @Column({ type: 'timestamp' })
+  expiresAt: Date
 }
