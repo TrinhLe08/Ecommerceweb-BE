@@ -24,7 +24,7 @@ export class ConfirmCodeService {
     return this.ConfirmCodeRepository.save(confirmCodeWithExpiry);
   }
 
-  @Cron(CronExpression.EVERY_HOUR) // Chạy mỗi giờ
+  @Cron(CronExpression.EVERY_HOUR)
   async deleteExpiredCodes() {
     const now = new Date();
     await this.ConfirmCodeRepository
