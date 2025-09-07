@@ -21,6 +21,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core'
 import { RabbitMQModule } from './external/rabbitMQ/rabbitmq.module';
 import { AuthModule } from './module/auth/auth.module';
+import { RedisModule } from './external/redis/redis.module';
 dotenv.config();
 
 @Module({
@@ -49,7 +50,8 @@ dotenv.config();
     AdminModule,
     CloudinaryModule,
     RabbitMQModule,
-    AuthModule
+    AuthModule,
+    RedisModule
   ],
   controllers: [AppController],
   providers: [AppService, CloudinaryService, {

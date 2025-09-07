@@ -30,7 +30,7 @@ private async Connect() {
     this.connection = connect([url]);
 
     this.channelWrapper = this.connection.createChannel({
-      json: true, // Tự động parse JSON
+      json: true,
       setup: (channel: amqp.Channel) => {
         return channel.assertQueue('my_queue', { durable: true });
       },
