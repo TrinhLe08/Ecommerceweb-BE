@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 
-interface CartItem {
+export interface CartItem {
     idProduct: string;
     urlAvatar: string;
     nameProduct: string;
@@ -54,7 +54,7 @@ export class RedisService {
         }
 
         // Lưu giỏ hàng mới vào Redis
-        await this.cache.set(cartKey, currentCart, 30 * 24 * 3600); // 30 days
+        await this.cache.set(cartKey, currentCart, 30 * 24 * 3600);
     }
 
     async updateCartItemQuantity(

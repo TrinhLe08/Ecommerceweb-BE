@@ -13,13 +13,15 @@ import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { ShoppingList } from 'src/entities/shoppingList.entity';
 import { ShoppingListType } from 'src/utils/shopping-list.type';
 import { RabbitMQService } from 'src/external/rabbitMQ/rabbitmq.service';
+import { CartItem, RedisService } from 'src/external/redis/redis.service';
 
 @Controller('/shopping-list')
 export class ShoppingListController {
   constructor(
     private readonly shoppingListService: ShoppingListService,
     private readonly rabbitMQService: RabbitMQService,
-  ) {}
+    private readonly redisService: RedisService
+  ) { }
 
   @Get('all')
   async getAllOrder(): Promise<ResponseData<ShoppingList[]>> {
@@ -40,23 +42,23 @@ export class ShoppingListController {
     @Body() order: ShoppingListType,
   ): Promise<ResponseData<ShoppingList | any>> {
     try {
-      if(order) {
-       await this.rabbitMQService.sendToQueue('order_processing', order)
-       return new ResponseData<ShoppingList | boolean | any>(
-             true,
-             HttpStatus.SUCCESS,
-             HttpMessage.SUCCESS,
-           );
+      if (order) {
+        await this.rabbitMQService.sendToQueue('order_processing', order)
+        return new ResponseData<ShoppingList | boolean | any>(
+          true,
+          HttpStatus.SUCCESS,
+          HttpMessage.SUCCESS,
+        );
       } else {
-       return new ResponseData<ShoppingList | boolean | any>(
-             false,
-             HttpStatus.ERROR,
-             HttpMessage.ERROR,
-           );
+        return new ResponseData<ShoppingList | boolean | any>(
+          false,
+          HttpStatus.ERROR,
+          HttpMessage.ERROR,
+        );
       }
     } catch (err) {
-              return new ResponseData<null>([], HttpStatus.ERROR, HttpMessage.ERROR);
-            }
+      return new ResponseData<null>([], HttpStatus.ERROR, HttpMessage.ERROR);
+    }
   }
 
   @Post('user-oders')
@@ -119,6 +121,20 @@ export class ShoppingListController {
       }
     } catch (err) {
       console.log(err);
+      return new ResponseData<null>([], HttpStatus.ERROR, HttpMessage.ERROR);
+    }
+  }
+
+  @Get('cart/:userId')
+  async getAllCart(@Param('userId') userId: string): Promise<ResponseData<CartItem[]>> {
+    try {
+      const allCart: CartItem[] = await this.redisService.getCart(userId);
+      return new ResponseData<CartItem[]>(
+        allCart,
+        HttpStatus.SUCCESS,
+        HttpMessage.SUCCESS,
+      );
+    } catch (err) {
       return new ResponseData<null>([], HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
