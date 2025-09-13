@@ -138,4 +138,28 @@ export class ShoppingListController {
       return new ResponseData<null>([], HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
+
+  @Post('add/:userId')
+  async addToCart(
+    @Param('userId') userId: string,
+    @Body() createCartItemDto: CartItem,
+  ) {
+    const dataAddToCart = await this.redisService.addToCart(
+      userId,
+      createCartItemDto.idProduct,
+      {
+        urlAvatar: createCartItemDto.urlAvatar,
+        nameProduct: createCartItemDto.nameProduct,
+        price: createCartItemDto.price,
+      },
+      createCartItemDto.quantity,
+    );
+
+    return new ResponseData<any>(
+      dataAddToCart,
+      HttpStatus.SUCCESS,
+      HttpMessage.SUCCESS,
+    );
+  }
+
 }
